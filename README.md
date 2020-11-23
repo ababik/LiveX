@@ -1,5 +1,7 @@
 # LiveX
-Light development web server to serve static content with live reloading support
+Cross-platform light development web server to serve static content with live reloading support
+
+![.NET Core](https://github.com/ababik/LiveX/workflows/.NET%20Core/badge.svg)
 
 ```
 Usage:
