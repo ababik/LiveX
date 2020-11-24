@@ -12,3 +12,10 @@ Options:
   --http <http>      HTTP port (skip to use random port)
   --https <https>    HTTPS port (skip to use random port)
 ```
+
+## Features
+- Web browser auto opening
+- Directory browsing
+- Live reloading
+- HTTPS support
+- CORS friendly (allow any header/method/origin)
