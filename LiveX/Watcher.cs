@@ -62,6 +62,11 @@ namespace LiveX
 
         private void HandleFileSystemChange(object sender, FileSystemEventArgs e)
         {
+            if (e.FullPath.Contains("node_modules"))
+            {
+                return;
+            }
+
             Set = true;
         }
     }
