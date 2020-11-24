@@ -73,7 +73,7 @@ namespace LiveX
             OpenBrowser(address);
         }
 
-        public static void OpenBrowser(string url)
+        private static void OpenBrowser(string url)
         {
             try
             {

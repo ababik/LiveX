@@ -16,7 +16,7 @@ namespace LiveX
         {
             var result = null as Options;
 
-            var command = new RootCommand("Light development web server to serve static content with live reloading support");
+            var command = new RootCommand("Cross-platform light development web server to serve static content with live reloading support");
             command.AddOption(new Option<string>("--path", "Content directory path (skip to use current directory)"));
             command.AddOption(new Option<int>("--http", "HTTP port (skip to use random port)"));
             command.AddOption(new Option<int>("--https", "HTTPS port (skip to use random port)"));
