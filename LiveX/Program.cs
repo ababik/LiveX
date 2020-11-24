@@ -34,11 +34,12 @@ namespace LiveX
 
             host.Start();
 
+            var logger = host.Services.GetService<ILogger<Program>>();
             var environment = host.Services.GetService<IWebHostEnvironment>();
             var serverAddressesFeature = host.ServerFeatures.Get<IServerAddressesFeature>();
 
             PrintRuntimeInfo(environment, serverAddressesFeature);
-            OpenBrowser(serverAddressesFeature);
+            OpenBrowser(serverAddressesFeature, logger);
 
             host.WaitForShutdown();
         }
@@ -67,36 +68,40 @@ namespace LiveX
             }
         }
 
-        private static void OpenBrowser(IServerAddressesFeature serverAddressesFeature)
+        private static void OpenBrowser(IServerAddressesFeature serverAddressesFeature, ILogger logger)
         {
             var address = serverAddressesFeature.Addresses.First();
-            OpenBrowser(address);
+            OpenBrowser(address, logger);
         }
 
-        private static void OpenBrowser(string url)
+        private static void OpenBrowser(string url, ILogger logger)
         {
+            var action = null as Action;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                action = () => Process.Start("cmd", $"/c start {url}");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                action = () => Process.Start("xdg-open", url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                action = () => Process.Start("open", url);
+            }
+            else
+            {
+                action = () => Process.Start(url);
+            }
+
             try
             {
-                Process.Start(url);
+                action.Invoke();
             }
-            catch
+            catch (Exception ex)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}"));
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    Process.Start("xdg-open", url);
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Process.Start("open", url);
-                }
-                else
-                {
-                    throw;
-                }
+                logger.LogWarning(ex, "Unable to open default web browser.");
             }
         }
     }
