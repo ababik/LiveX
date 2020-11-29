@@ -35,6 +35,7 @@ namespace LiveX
         private bool IsHtml(HttpContext context)
         {
             return
+                context.Request.Method == HttpMethods.Get &&
                 FileExtensionContentTypeProvider.TryGetContentType(context.Request.Path, out var contentType) &&
                 contentType == "text/html";
         }
@@ -51,16 +52,19 @@ namespace LiveX
             await next();
             response.Body = prevStream;
 
-            var bytes = nextStream.ToArray();
-            var content = Encoding.Default.GetString(bytes);
-
-            if (response.StatusCode == 200)
+            if (IsBodyAvailable(response.StatusCode))
             {
-                content = Insert(content);
-                response.ContentLength = Encoding.Default.GetByteCount(content);
-            }
+                var bytes = nextStream.ToArray();
+                var content = Encoding.Default.GetString(bytes);
 
-            await response.WriteAsync(content);
+                if (response.StatusCode == StatusCodes.Status200OK)
+                {
+                    content = Insert(content);
+                    response.ContentLength = Encoding.Default.GetByteCount(content);
+                }
+
+                await response.WriteAsync(content);
+            }
         }
 
         private string Insert(string content)
@@ -75,6 +79,13 @@ namespace LiveX
             }
 
             return content;
+        }
+
+        private static bool IsBodyAvailable(int status)
+        {
+            return status != StatusCodes.Status204NoContent &&
+                   status != StatusCodes.Status205ResetContent &&
+                   status != StatusCodes.Status304NotModified;
         }
     }
 }
