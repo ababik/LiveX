@@ -18,4 +18,5 @@ Options:
 - Directory browsing
 - Live reloading
 - HTTPS support
+- Cache friendly (don't let broswer caching content)
 - CORS friendly (allow any header/method/origin)
