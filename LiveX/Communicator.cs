@@ -72,7 +72,7 @@ namespace LiveX
                         break;
                     }
                 }
-                catch (OperationCanceledException)
+                catch (Exception ex) when (ex is WebSocketException || ex is OperationCanceledException)
                 {
                     break;
                 }
