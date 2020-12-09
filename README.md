@@ -17,6 +17,7 @@ Options:
 - Web browser auto opening
 - Directory browsing
 - Live reloading
+- CSS hot reloading
 - HTTPS support
 - Cache friendly (don't let broswer caching content)
 - CORS friendly (allow any header/method/origin)
