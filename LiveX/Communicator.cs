@@ -88,20 +88,35 @@ namespace LiveX
             Logger.LogInformation("Close web socket. Count: " + WebSockets.Count);
         }
 
-        public void Notify()
+        public void NotifyGeneralUpdate()
         {
-            Logger.LogInformation("Send refresh. Count: " + WebSockets.Count);
+            Logger.LogInformation("Notify general update. Count: " + WebSockets.Count);
 
-            WebSockets
-                .ToList()
-                .ForEach((x) => TryNotify(x));
+            Notify(RefreshMessageBytes);
         }
 
-        private async Task TryNotify(WebSocket webSocket)
+        public void NotifyStyleUpdate(string path)
+        {
+            Logger.LogInformation($"Notify style update ({path}). Count: " + WebSockets.Count);
+
+            var url = Program.ToUrl(path);
+            var data = Encoding.Default.GetBytes("@css:" + url);
+
+            Notify(data);
+        }
+
+        private void Notify(byte[] data)
+        {
+            WebSockets
+                .ToList()
+                .ForEach((x) => TryNotify(x, data));
+        }
+
+        private async Task TryNotify(WebSocket webSocket, byte[] data)
         {
             try
             {
-                var segment = new ArraySegment<byte>(RefreshMessageBytes);
+                var segment = new ArraySegment<byte>(data);
                 await webSocket.SendAsync(segment, WebSocketMessageType.Text, true, Lifetime.ApplicationStopping);
             }
             catch (Exception ex)

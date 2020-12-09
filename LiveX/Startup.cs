@@ -45,7 +45,8 @@ namespace LiveX
             app.UseStaticFiles();
             app.UseDirectoryBrowser();
 
-            watcher.Update += communicator.Notify;
+            watcher.OnGeneralUpdate += communicator.NotifyGeneralUpdate;
+            watcher.OnStyleUpdate += communicator.NotifyStyleUpdate;
             watcher.Start();
         }
     }

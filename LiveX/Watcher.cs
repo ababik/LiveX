@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Timers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,13 +19,18 @@ namespace LiveX
         private ILogger Logger { get; }
         private Timer Timer { get; }
         private FileSystemWatcher FileSystemWatcher { get; }
-        private bool Set { get; set; }
+        private bool IsGeneralUpdate { get; set; }
+        private bool IsStyleUpdate { get; set; }
+        private HashSet<string> StylesToUpdate { get; }
 
-        public event Action Update;
+        public event Action OnGeneralUpdate;
+        public event Action<string> OnStyleUpdate;
 
         public Watcher(ILogger logger, string path, TimeSpan interval)
         {
             Logger = logger;
+
+            StylesToUpdate = new HashSet<string>();
 
             FileSystemWatcher = new FileSystemWatcher(path);
             FileSystemWatcher.Changed += HandleFileSystemChange;
@@ -51,10 +58,22 @@ namespace LiveX
 
         private void HandleTimerElapse(object sender, ElapsedEventArgs e)
         {
-            if (Set)
+            if (IsGeneralUpdate)
             {
-                Update.Invoke();
-                Set = false;
+                OnGeneralUpdate.Invoke();
+
+                IsGeneralUpdate = false;
+                IsStyleUpdate = false;
+            }
+            
+            if (IsStyleUpdate)
+            {
+                StylesToUpdate
+                    .ToList()
+                    .ForEach(OnStyleUpdate.Invoke);
+
+                IsStyleUpdate = false;
+                StylesToUpdate.Clear();
             }
 
             Timer.Start();
@@ -62,12 +81,34 @@ namespace LiveX
 
         private void HandleFileSystemChange(object sender, FileSystemEventArgs e)
         {
-            if (e.FullPath.Contains("node_modules"))
+            if (CheckSkipDirectories(e.FullPath))
             {
                 return;
             }
 
-            Set = true;
+            if (e.ChangeType == WatcherChangeTypes.Changed)
+            {
+                var extension = Path.GetExtension(e.Name);
+
+                if (CheckStyleExtension(extension))
+                {
+                    IsStyleUpdate = true;
+                    StylesToUpdate.Add(e.FullPath);
+                    return;
+                }
+            }
+
+            IsGeneralUpdate = true;
+        }
+
+        private static bool CheckSkipDirectories(string path)
+        {
+            return path.Contains("node_modules");
+        }
+
+        private static bool CheckStyleExtension(string extension)
+        {
+            return string.Equals(extension, ".css", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -42,6 +43,13 @@ namespace LiveX
             OpenBrowser(serverAddressesFeature, logger);
 
             host.WaitForShutdown();
+        }
+
+        public static string ToUrl(string path)
+        {
+            return Path
+                .GetRelativePath(Program.Options.Path, path)
+                .Replace('\\', '/');
         }
 
         private static void ConfigureLogger(ILoggingBuilder builder)
