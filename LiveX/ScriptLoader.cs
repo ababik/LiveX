@@ -33,7 +33,8 @@ namespace LiveX
         {
             if (context.Request.Path == "/@.js")
             {
-                var content = await File.ReadAllTextAsync("livex.js");
+                var directory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                var content = await File.ReadAllTextAsync(Path.Combine(directory, "livex.js"));
 
                 var protocol = context.Request.IsHttps ? "wss" : "ws";
                 var host = context.Request.Host.Value;
